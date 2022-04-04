@@ -15,13 +15,13 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 /**
-  * @file Weather.h
-  * 
-  * Main file with setup() and loop()
-  */
-  
+    @file Weather.h
+
+    Main file with setup() and loop()
+*/
+
 #include <M5EPD.h>
-#include "Config.h"
+//#include "Config.h"
 #include "ConfigOverride.h" // Remove this line
 #include "Data.h"
 #include "Display.h"
@@ -33,9 +33,7 @@
 #include "Time.h"
 #include "Utils.h"
 #include "Weather.h"
-
-// Refresh the M5Paper info more often.
-// #define REFRESH_PARTLY 1
+#include "Json_data.h"
 
 MyData         myData;            // The collection of the global data
 WeatherDisplay myDisplay(myData); // The global display helper class
@@ -43,50 +41,56 @@ WeatherDisplay myDisplay(myData); // The global display helper class
 /* Start and M5Paper instance */
 void setup()
 {
-#ifndef REFRESH_PARTLY
-   InitEPD(true);
-   if (StartWiFi(myData.wifiRSSI)) {
+  myData.LoadNVS();
+  if (myData.nvsCounter == 1)
+  {
+    InitEPD(true);
+    if (StartWiFi(myData.wifiRSSI))
+    {
       GetBatteryValues(myData);
       GetSHT30Values(myData);
       GetMoonValues(myData);
-      if (myData.weather.Get()) {
-         SetRTCDateTime(myData);
+      if (myData.weather.Get())
+      {
+        SetRTCDateTime(myData);
       }
+      
+#if defined(DISPLAY_JSON_DATA)
+      if (myData.jsonData.Get())
+      {
+        Serial.println("Json data fetch successfull");
+      }
+#endif
+
       myData.Dump();
       myDisplay.Show();
       StopWiFi();
-   }
-   ShutdownEPD(60 * 60); // every 1 hour
-#else 
-   myData.LoadNVS();
-   if (myData.nvsCounter == 1) {
-      InitEPD(true);
-      if (StartWiFi(myData.wifiRSSI)) {
-         GetBatteryValues(myData);
-         GetSHT30Values(myData);
-         GetMoonValues(myData);
-         if (myData.weather.Get()) {
-            SetRTCDateTime(myData);
-         }
-         myData.Dump();
-         myDisplay.Show();
-         StopWiFi();
-      }
-   } else {
-      InitEPD(false);
-      GetSHT30Values(myData);
-      myDisplay.ShowM5PaperInfo();
-      if (myData.nvsCounter >= 60) {
-         myData.nvsCounter = 0;
-      }
-   }
-   myData.nvsCounter++;
-   myData.SaveNVS();
-   ShutdownEPD(600); // 10 minute
-#endif // REFRESH_PARTLY   
+    }
+  } else
+  {
+    InitEPD(false);
+    GetSHT30Values(myData);
+    myDisplay.ShowM5PaperInfo();
+    if (myData.nvsCounter >= WIFI_DATA_FETCH_DEVIDER)
+    {
+      myData.nvsCounter = 0;
+    }
+  }
+  myData.nvsCounter++;
+  myData.SaveNVS();
+  ShutdownEPD(REFRESH_INTERVAL);
 }
 
 /* Main loop. Never reached because of shutdown */
 void loop()
 {
+  /* M5 paper is not able to go to powerdown if the USB is still connected.
+     This is some kind of workaround to simulate the powerdown and wakeup cycle while the USB is still connected.
+  */
+
+  if (millis() >= REFRESH_INTERVAL * 1000)
+  {
+    ESP.restart();
+  }
+
 }

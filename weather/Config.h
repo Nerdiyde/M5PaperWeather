@@ -21,8 +21,15 @@
   */
 #pragma once
 
+//Activate this if you want to update the loc
+#define REFRESH_INTERVAL 600 // Display refresh interval in seconds. This is equivalent to the ESP32 sleep duration.
+
+// This defines how often the data should be updated via Wifi. 
+// If you set this to 2 data via wifi is fetched at every second wake up from deep sleep. E.g. you set REFRESH_INTERVAL to 600=10 minutes and WIFI_DATA_FETCH_DEVIDER to 2 the data is fetched every 20 minutes.
+#define WIFI_DATA_FETCH_DEVIDER 2
+
 #define VERSION          "Version 1.0"
-#define CITY_NAME        "City"
+#define HEADLINE_STRING        "ENTER_CITY_NAME_HERE"
 
 // change to your location
 #define LATITUDE         47.69732 
@@ -30,7 +37,7 @@
 
 #define OPENWEATHER_SRV  "api.openweathermap.org"
 #define OPENWEATHER_PORT 80
-#define OPENWEATHER_API  "your openweathermap api key"
+#define OPENWEATHER_API  "ENTER_API_KEY_HERE"
 
-#define WIFI_SSID        "your wifi ssid"
-#define WIFI_PW          "your wifi password"
+#define WIFI_SSID        "ENTER_WIFI_SSID_HERE"
+#define WIFI_PW          "ENTER_WIFI_PW_HERE"

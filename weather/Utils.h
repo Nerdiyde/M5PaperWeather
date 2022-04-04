@@ -209,3 +209,9 @@ double NormalizedMoonPhase(int d, int m, int y)
    
    return (Phase - (int) Phase);
 }
+
+/* Convert the time_t to the date part MM/DD */
+String getShortDayOfWeekString(time_t rawtime)
+{
+   return (String) dayShortStr(weekday(rawtime));
+}

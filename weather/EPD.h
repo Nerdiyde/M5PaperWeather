@@ -27,9 +27,10 @@ void InitEPD(bool clearDisplay = true)
    M5.begin(false, false, true, true, false);
    M5.RTC.begin();
    
-   M5.EPD.SetRotation(0);
-   M5.TP.SetRotation(0);
-   if (clearDisplay) {
+   M5.EPD.SetRotation(DISPLAY_ORIENTATION);
+   M5.TP.SetRotation(DISPLAY_ORIENTATION);
+   if (clearDisplay) 
+   {
       M5.EPD.Clear(true);
    }
 

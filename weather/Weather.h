@@ -15,10 +15,10 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 /**
-  * @file Weather.h
-  * 
-  * Class for reading all the weather data from openweathermap.
-  */
+    @file Weather.h
+
+    Class for reading all the weather data from openweathermap.
+*/
 #pragma once
 #include <HTTPClient.h>
 #include <WiFiClient.h>
@@ -30,45 +30,67 @@
 #define MIN_RAIN     10
 
 /**
-  * Class for reading all the weather data from openweathermap.
-  */
+    Class for reading all the weather data from openweathermap.
+*/
 class Weather
 {
-public:
-   time_t currentTime;                     //!< Current timestamp
-   int    currentTimeOffset;               //!< Current timezone
+  public:
+    time_t currentTime;                     //!< Current timestamp
+    int    currentTimeOffset;               //!< Current timezone
 
-   time_t sunrise;                         //!< Sunrise timestamp
-   time_t sunset;                          //!< Sunset timestamp
-   float  winddir;                         //!< Wind direction
-   float  windspeed;                       //!< Wind speed
+    time_t sunrise;                         //!< Sunrise timestamp
+    time_t sunset;                          //!< Sunset timestamp
+    float  winddir;                         //!< Wind direction
+    float  windspeed;                       //!< Wind speed
 
-   time_t hourlyTime[MAX_HOURLY];          //!< timestamp of the hourly forecast
-   float  hourlyMaxTemp[MAX_HOURLY];       //!< max temperature forecast
-   String hourlyMain[MAX_HOURLY];          //!< description of the hourly forecast
-   String hourlyIcon[MAX_HOURLY];          //!< openweathermap icon of the forecast weather
+    /*
+        time_t hourlyTime[MAX_HOURLY];          //!< timestamp of the hourly forecast
+        float  hourlyMaxTemp[MAX_HOURLY];       //!< max temperature forecast
+        String hourlyMain[MAX_HOURLY];          //!< description of the hourly forecast
+        String hourlyIcon[MAX_HOURLY];          //!< openweathermap icon of the forecast weather
 
-   int    maxRain;                         //!< maximum rain in mm of the day forecast
-   float  forecastMaxTemp[MAX_FORECAST];   //!< max temperature
-   float  forecastMinTemp[MAX_FORECAST];   //!< min temperature
-   float  forecastRain[MAX_FORECAST];      //!< max rain in mm
-   float  forecastHumidity[MAX_FORECAST];  //!< humidity of the dayly forecast
-   float  forecastPressure[MAX_FORECAST];  //!< air pressure
+        float  forecastMaxTemp[MAX_FORECAST];   //!< max temperature
+        float  forecastMinTemp[MAX_FORECAST];   //!< min temperature
+        float  forecastRain[MAX_FORECAST];      //!< max rain in mm
+        float  forecastPressure[MAX_FORECAST];  //!< air pressure
+    */
+    int    maxRain;                         //!< maximum rain in mm of the day forecast
+    float  forecastHumidity[MAX_FORECAST];  //!< humidity of the dayly forecast
 
-protected:
-   /* Convert UTC time to local time */
-   time_t LocalTime(time_t time)
-   {
+    time_t hourlyTime[MAX_HOURLY];          //!< timestamp of the hourly forecast
+    int    hourlyTempRange[2];              //!< min/max temp of the hourly forecast
+    float  hourlyMaxTemp[MAX_HOURLY];       //!< max temperature forecast
+    int    hourlyMaxRain;                   //!< maximum rain in mm of the hourly forecast
+    float  hourlyRain[MAX_HOURLY];          //!< max rain in mm
+    float  hourlyPop[MAX_HOURLY];           //!< pop of the hourly forecast
+    float  hourlyPressure[MAX_HOURLY];      //!< air pressure
+    String hourlyMain[MAX_HOURLY];          //!< description of the hourly forecast
+    String hourlyIcon[MAX_HOURLY];          //!< openweathermap icon of the forecast weather
+
+    time_t forecastTime[MAX_FORECAST];      //!< timestamp of the daily forecast
+    int    forecastTempRange[2];            //!< min/max temp of the daily forecast
+    float  forecastMaxTemp[MAX_FORECAST];   //!< max temperature
+    float  forecastMinTemp[MAX_FORECAST];   //!< min temperature
+    int    forecastMaxRain;                 //!< maximum rain in mm of the daily forecast
+    float  forecastRain[MAX_FORECAST];      //!< max rain in mm
+    float  forecastPop[MAX_FORECAST];       //!< pop of the dayly forecast
+    float  forecastPressure[MAX_FORECAST];  //!< air pressure
+    String forecastIcon[MAX_FORECAST];      //!< openweathermap icon of the forecast weather
+
+  protected:
+    /* Convert UTC time to local time */
+    time_t LocalTime(time_t time)
+    {
       return time + currentTimeOffset;
-   }
+    }
 
-   /* Calls the openweathermap request and deserialisation the json data. */
-   bool GetOpenWeatherJsonDoc(DynamicJsonDocument &doc)
-   {
+    /* Calls the openweathermap request and deserialisation the json data. */
+    bool GetOpenWeatherJsonDoc(DynamicJsonDocument &doc)
+    {
       WiFiClient client;
       HTTPClient http;
       String     uri;
-      
+
       uri += "/data/2.5/onecall";
       uri += "?lat=" + String((float) LATITUDE, 5);
       uri += "&lon=" + String((float) LONGITUDE, 5);
@@ -77,30 +99,31 @@ protected:
 
       client.stop();
       http.begin(client, OPENWEATHER_SRV, OPENWEATHER_PORT, uri);
-      
-      int httpCode = http.GET();
-      
-      if (httpCode != HTTP_CODE_OK) {
-         Serial.printf("GetWeather failed, error: %s", http.errorToString(httpCode).c_str());
-         client.stop();
-         http.end();
-         return false;
-      } else {
-         DeserializationError error = deserializeJson(doc, http.getStream());
-         
-         if (error) {
-            Serial.print(F("deserializeJson() failed: "));
-            Serial.println(error.c_str());
-            return false;
-         } else {
-            return true;
-         }
-      }
-   }
 
-   /* Fill from the json data into the internal data. */
-   bool Fill(const JsonObject &root) 
-   {
+      int httpCode = http.GET();
+
+      if (httpCode != HTTP_CODE_OK) {
+        Serial.printf("GetWeather failed, error: %s", http.errorToString(httpCode).c_str());
+        client.stop();
+        http.end();
+        return false;
+      } else {
+        DeserializationError error = deserializeJson(doc, http.getStream());
+
+        if (error) {
+          Serial.print(F("deserializeJson() failed: "));
+          Serial.println(error.c_str());
+          return false;
+        } else
+        {
+          return true;
+        }
+      }
+    }
+
+    /* Fill from the json data into the internal data. */
+    bool Fill(const JsonObject &root)
+    {
       Clear();
 
       currentTimeOffset = root["timezone_offset"].as<int>();
@@ -111,39 +134,91 @@ protected:
       winddir           = root["current"]["wind_deg"].as<float>();
       windspeed         = root["current"]["wind_speed"].as<float>();
 
+      /*JsonArray hourly_list = root["hourly"];
+        hourlyTime[0]    = LocalTime(root["current"]["dt"].as<int>());
+        hourlyMaxTemp[0] = root["current"]["temp"].as<float>();
+        hourlyMain[0]    = root["current"]["weather"][0]["main"].as<char *>();
+        hourlyIcon[0]    = root["current"]["weather"][0]["icon"].as<char *>();
+        for (int i = 1; i < MAX_HOURLY; i++) {
+        if (i < hourly_list.size()) {
+          hourlyTime[i]    = LocalTime(hourly_list[i - 1]["dt"].as<int>());
+          hourlyMaxTemp[i] = hourly_list[i - 1]["temp"].as<float>();
+          hourlyMain[i]    = hourly_list[i - 1]["weather"][0]["main"].as<char *>();
+          hourlyIcon[i]    = hourly_list[i - 1]["weather"][0]["icon"].as<char *>();
+        }
+        }
+
+        JsonArray dayly_list  = root["daily"];
+        for (int i = 0; i < MAX_FORECAST; i++) {
+        if (i < dayly_list.size()) {
+          forecastMaxTemp[i]  = dayly_list[i]["temp"]["max"].as<float>();
+          forecastMinTemp[i]  = dayly_list[i]["temp"]["min"].as<float>();
+          forecastRain[i]     = dayly_list[i]["rain"].as<float>();
+          forecastHumidity[i] = dayly_list[i]["humidity"].as<float>();
+          forecastPressure[i] = dayly_list[i]["pressure"].as<float>();
+          if (forecastRain[i] > maxRain) {
+            maxRain = forecastRain[i];
+          }
+        }
+        }*/
+
+
       JsonArray hourly_list = root["hourly"];
       hourlyTime[0]    = LocalTime(root["current"]["dt"].as<int>());
       hourlyMaxTemp[0] = root["current"]["temp"].as<float>();
       hourlyMain[0]    = root["current"]["weather"][0]["main"].as<char *>();
+      hourlyRain[0]    = max(root["current"]["rain"]["1h"].as<float>(), root["current"]["snow"]["1h"].as<float>());
+      hourlyPop[0]     = root["current"]["pop"].as<float>() * 100;
+      hourlyPressure[0] = root["current"]["pressure"].as<float>();
       hourlyIcon[0]    = root["current"]["weather"][0]["icon"].as<char *>();
       for (int i = 1; i < MAX_HOURLY; i++) {
-         if (i < hourly_list.size()) {
-            hourlyTime[i]    = LocalTime(hourly_list[i - 1]["dt"].as<int>());
-            hourlyMaxTemp[i] = hourly_list[i - 1]["temp"].as<float>();
-            hourlyMain[i]    = hourly_list[i - 1]["weather"][0]["main"].as<char *>();
-            hourlyIcon[i]    = hourly_list[i - 1]["weather"][0]["icon"].as<char *>();
-         }
+        if (i < hourly_list.size()) {
+          hourlyTime[i]    = LocalTime(hourly_list[i - 1]["dt"].as<int>());
+          hourlyMaxTemp[i] = hourly_list[i - 1]["temp"].as<float>();
+          hourlyMain[i]    = hourly_list[i - 1]["weather"][0]["main"].as<char *>();
+          hourlyRain[i]    = max(hourly_list[i - 1]["rain"]["1h"].as<float>(), hourly_list[i - 1]["snow"]["1h"].as<float>());
+          hourlyPop[i]     = hourly_list[i - 1]["pop"].as<float>() * 100;
+          hourlyPressure[i] = hourly_list[i - 1]["pressure"].as<float>();
+          hourlyIcon[i]    = hourly_list[i - 1]["weather"][0]["icon"].as<char *>();
+          if (hourlyRain[i] > hourlyMaxRain) {
+            hourlyMaxRain = hourlyRain[i] + 4;
+          }
+          if (hourlyMaxTemp[i] + 2 > hourlyTempRange[1]) {
+            hourlyTempRange[1] = (int)((hourlyMaxTemp[i] + 2) / 5) * 5 + 5;
+          }
+          if (hourlyMaxTemp[i] - 2 < hourlyTempRange[0]) {
+            hourlyTempRange[0] = (int)((hourlyMaxTemp[i] - 2) / 5) * 5 - 5;
+          }
+        }
       }
-      
+
       JsonArray dayly_list  = root["daily"];
       for (int i = 0; i < MAX_FORECAST; i++) {
-         if (i < dayly_list.size()) {
-            forecastMaxTemp[i]  = dayly_list[i]["temp"]["max"].as<float>();
-            forecastMinTemp[i]  = dayly_list[i]["temp"]["min"].as<float>();
-            forecastRain[i]     = dayly_list[i]["rain"].as<float>();
-            forecastHumidity[i] = dayly_list[i]["humidity"].as<float>();
-            forecastPressure[i] = dayly_list[i]["pressure"].as<float>();
-            if (forecastRain[i] > maxRain) {
-               maxRain = forecastRain[i];
-            }
-         }
+        if (i < dayly_list.size()) {
+          forecastTime[i]     = LocalTime(dayly_list[i]["dt"].as<int>());
+          forecastMaxTemp[i]  = dayly_list[i]["temp"]["max"].as<float>();
+          forecastMinTemp[i]  = dayly_list[i]["temp"]["min"].as<float>();
+          forecastRain[i]     = max(dayly_list[i]["rain"].as<float>(), dayly_list[i]["snow"].as<float>());
+          forecastPop[i]      = dayly_list[i]["pop"].as<float>() * 100;
+          forecastPressure[i] = dayly_list[i]["pressure"].as<float>();
+          forecastIcon[i]     = dayly_list[i]["weather"][0]["icon"].as<char *>();
+        }
+        if (forecastRain[i] > forecastMaxRain) {
+          forecastMaxRain = forecastRain[i] + 4;
+        }
+        if (forecastMaxTemp[i] + 2 > forecastTempRange[1]) {
+          forecastTempRange[1] = (int)((forecastMaxTemp[i] + 2) / 5) * 5 + 5;
+        }
+        if (forecastMinTemp[i] - 2 < forecastTempRange[0]) {
+          forecastTempRange[0] = (int)((forecastMinTemp[i] - 2) / 5) * 5 - 5;
+        }
       }
-          
-      return true;
-   }
 
-public:
-   Weather()
+      return true;
+    }
+
+  public:
+    Weather()
       : currentTime(0)
       , currentTimeOffset(0)
       , sunrise(0)
@@ -151,13 +226,15 @@ public:
       , winddir(0)
       , windspeed(0)
       , maxRain(MIN_RAIN)
-   {
+      , hourlyMaxRain(MIN_RAIN)
+      , forecastMaxRain(MIN_RAIN)
+    {
       Clear();
-   }
+    }
 
-   /* Clear the internal data. */
-   void Clear()
-   {
+    /* Clear the internal data. */
+    void Clear()
+    {
       currentTime       = 0;
       currentTimeOffset = 0;
       sunrise           = 0;
@@ -165,22 +242,31 @@ public:
       winddir           = 0;
       windspeed         = 0;
       maxRain           = MIN_RAIN;
+      hourlyMaxRain           = MIN_RAIN;
+      forecastMaxRain         = MIN_RAIN;
+      hourlyTempRange[0]         = 0;
+      hourlyTempRange[1]         = 25;
+      forecastTempRange[0]       = 0;
+      forecastTempRange[1]       = 25;
       memset(hourlyMaxTemp,    0, sizeof(hourlyMaxTemp));
       memset(forecastMaxTemp,  0, sizeof(forecastMaxTemp));
       memset(forecastMinTemp,  0, sizeof(forecastMinTemp));
       memset(forecastRain,     0, sizeof(forecastRain));
       memset(forecastHumidity, 0, sizeof(forecastHumidity));
       memset(forecastPressure, 0, sizeof(forecastPressure));
-   }
+      memset(forecastPop,      0, sizeof(forecastPop));
+      memset(forecastPressure, 0, sizeof(forecastPressure));
+    }
 
-   /* Start the request and the filling. */
-   bool Get()
-   {
+    /* Start the request and the filling. */
+    bool Get()
+    {
       DynamicJsonDocument doc(35 * 1024);
-   
-      if (GetOpenWeatherJsonDoc(doc)) {
-         return Fill(doc.as<JsonObject>());
+
+      if (GetOpenWeatherJsonDoc(doc))
+      {
+        return Fill(doc.as<JsonObject>());
       }
       return false;
-   }
+    }
 };

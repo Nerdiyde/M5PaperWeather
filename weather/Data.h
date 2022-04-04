@@ -22,6 +22,7 @@
 #pragma once
 
 #include "Weather.h"
+#include "Json_data.h"
 #include <nvs.h>
 
 
@@ -43,6 +44,8 @@ public:
    time_t  moonSet;          //!< Calculated moon set
    
    Weather weather;          //!< All the openweathermap data
+   
+   Json_data jsonData;          //!< All the openweathermap data
 
 public:
    MyData()
