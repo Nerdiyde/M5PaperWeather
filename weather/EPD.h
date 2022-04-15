@@ -46,11 +46,11 @@ void ShutdownEPD(int sec)
 {
    Serial.println("Shutdown");
 /*
+   esp_sleep_enable_timer_wakeup(sec * 1000000);
+   esp_deep_sleep_start();  
    M5.disableEPDPower();
    M5.disableEXTPower();
-   M5.disableMainPower();
-   esp_sleep_enable_timer_wakeup(sec * 1000000);
-   esp_deep_sleep_start();   
+   M5.disableMainPower(); 
 */   
    M5.shutdown(sec);
 }

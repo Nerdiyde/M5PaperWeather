@@ -40,8 +40,13 @@ class Json_data
       WiFiClient client;
       HTTPClient http;
 
-      client.stop();
+      //client.stop();
+
+#if !defined(JSON_DATA_URL_USES_HTTPS)
       http.begin(client, JSON_DATA_URL, JSON_DATA_PORT, JSON_DATA_PATH);
+#else
+      http.begin(client, JSON_DATA_URL, JSON_DATA_PORT, JSON_DATA_PATH, true);
+#endif
 
       int httpCode = http.GET();
 
@@ -54,7 +59,7 @@ class Json_data
       } else
       {
         DeserializationError error = deserializeJson(doc, http.getStream());
-
+        client.stop();
         if (error)
         {
           Serial.print(F("deserializeJson() failed: "));

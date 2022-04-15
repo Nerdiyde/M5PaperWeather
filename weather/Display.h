@@ -461,17 +461,17 @@ void WeatherDisplay::DrawGraph(int x, int y, int dx, int dy, String title, int x
 /* Draw json_data values */
 void WeatherDisplay::DrawJsonData(int x, int y, int textSize, Json_data &jsonData, uint8_t column_id)
 {
-  String row_names[MAX_ROWS] = jsonData.row_names[column_id];
-  String row_values[MAX_ROWS] = jsonData.row_values[column_id];
-
   canvas.setTextSize(textSize);
 
   for (int i = 0; i < MAX_ROWS; i++)
   {
-    if (row_names[i].length() <= 0 && row_values[i].length() <= 0)
+    String row_names = jsonData.row_names[column_id][i];
+    String row_values = jsonData.row_values[column_id][i];
+
+    if (row_names.length() <= 0 && row_values.length() <= 0)
       break;
 
-    String output = row_names[i] + ":" + row_values[i];
+    String output = row_names + ":" + row_values;
     canvas.drawString(output, x, y + (i * textSize * 15), 1);
   }
 }
@@ -511,7 +511,7 @@ void WeatherDisplay::Show()
     canvas.drawLine(x, 286, x, 408, M5EPD_Canvas::G15);
     DrawDaily(x, 286, 116, 122, myData.weather, i);
   }
-  
+
 #elif defined(DISPLAY_WEATHER_DETAILS_HOURLY)
 
   for (int x = 15, i = 0; x <= 930; x += 116, i += 3)

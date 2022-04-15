@@ -20,9 +20,16 @@
     Main file with setup() and loop()
 */
 
+
+/*
+ * TODO:
+ * - handle json from https URL
+ * - broadcast internal data (battery state, sensor data, etc) via mqtt
+ */
+
 #include <M5EPD.h>
 #include "Config.h"
-//#include "ConfigOverride.h" // Remove this line
+#include "ConfigOverride.h" // Remove this line
 #include "Data.h"
 #include "Display.h"
 #include "Battery.h"
