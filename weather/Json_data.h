@@ -21,7 +21,11 @@
 */
 #pragma once
 #include <HTTPClient.h>
-#include <WiFiClient.h>
+#if defined(JSON_DATA_URL_USES_HTTPS)
+  #include <WiFiClientSecure.h>
+#else
+  #include <WiFiClient.h>
+#endif
 #include <ArduinoJson.h>
 
 #define MAX_COLUMNS   5
@@ -37,14 +41,16 @@ class Json_data
     /* Handles json data fetch and deserialisation of the json data. */
     bool GetJsonObject(DynamicJsonDocument &doc)
     {
-      WiFiClient client;
       HTTPClient http;
 
       //client.stop();
 
 #if !defined(JSON_DATA_URL_USES_HTTPS)
+      WiFiClient client;
       http.begin(client, JSON_DATA_URL, JSON_DATA_PORT, JSON_DATA_PATH);
 #else
+      WiFiClientSecure client;
+      client.setInsecure();//skip verification
       http.begin(client, JSON_DATA_URL, JSON_DATA_PORT, JSON_DATA_PATH, true);
 #endif
 
