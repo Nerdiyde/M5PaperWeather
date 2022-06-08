@@ -20,12 +20,12 @@
     Main file with setup() and loop()
 */
 
-
 /*
- * TODO:
- * - handle json from https URL
- * - broadcast internal data (battery state, sensor data, etc) via mqtt
- */
+   History:
+   - 08.06.2022: 
+     - Added support for device data transmission via GET parameter during the JSON data fetch
+     - Added support to connect to (self signed) HTTPS endpoints to fetch JSON data 
+*/
 
 #include <M5EPD.h>
 #include "Config.h"
@@ -61,9 +61,9 @@ void setup()
       {
         SetRTCDateTime(myData);
       }
-      
+
 #if defined(DISPLAY_JSON_DATA)
-      if (myData.jsonData.Get())
+      if (myData.jsonData.Get(myData.wifiRSSI, myData.batteryVolt, myData.batteryCapacity, myData.sht30Temperatur, myData.sht30Humidity))
       {
         Serial.println("Json data fetch successfull");
       }

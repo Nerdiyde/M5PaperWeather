@@ -35,17 +35,26 @@ class Json_data
   protected:
 
     /* Handles json data fetch and deserialisation of the json data. */
-    bool GetJsonObject(DynamicJsonDocument &doc)
+    bool GetJsonObject(DynamicJsonDocument &doc, int wifiRSSI, float batteryVolt, int batteryCapacity, int sht30Temperatur, int sht30Humidity)
     {
-      WiFiClient client;
       HTTPClient http;
 
       //client.stop();
 
+      String path = String(JSON_DATA_PATH)
+                    + "?wifiRSSI=" + String(wifiRSSI)
+                    + "&batteryVolt=" + String(batteryVolt)
+                    + "&batteryCapacity=" + String(batteryCapacity)
+                    + "&sht30Temperatur=" + String(sht30Temperatur)
+                    + "&sht30Humidity=" + String(sht30Humidity);
+
 #if !defined(JSON_DATA_URL_USES_HTTPS)
-      http.begin(client, JSON_DATA_URL, JSON_DATA_PORT, JSON_DATA_PATH);
+      WiFiClient client;
+      http.begin(client, JSON_DATA_URL, JSON_DATA_PORT, path);
 #else
-      http.begin(client, JSON_DATA_URL, JSON_DATA_PORT, JSON_DATA_PATH, true);
+      WiFiClientSecure client;
+      client.setInsecure();
+      http.begin(client, JSON_DATA_URL, JSON_DATA_PORT, path, true);
 #endif
 
       int httpCode = http.GET();
@@ -106,11 +115,11 @@ class Json_data
     String row_values[MAX_COLUMNS][MAX_ROWS];          //!< description of the hourly forecast
 
     /* Start the request and the filling. */
-    bool Get()
+    bool Get(int wifiRSSI, float batteryVolt, int batteryCapacity, int sht30Temperatur, int sht30Humidity)
     {
       DynamicJsonDocument doc(35 * 1024);
 
-      if (GetJsonObject(doc))
+      if (GetJsonObject(doc, wifiRSSI, batteryVolt, batteryCapacity, sht30Temperatur, sht30Humidity))
       {
         // serialize the array and send the result to Serial
         return Fill(doc.as<JsonObject>());
