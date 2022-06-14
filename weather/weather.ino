@@ -24,7 +24,9 @@
    History:
    - 08.06.2022: 
      - Added support for device data transmission via GET parameter during the JSON data fetch
-     - Added support to connect to (self signed) HTTPS endpoints to fetch JSON data 
+     - Added support to connect to (self signed) HTTPS endpoints to fetch JSON data
+   - 14.06.2022:    
+     - Added error message for in case JSON data can not be retrieved 
 */
 
 #include <M5EPD.h>
@@ -63,14 +65,18 @@ void setup()
       }
 
 #if defined(DISPLAY_JSON_DATA)
-      if (myData.jsonData.Get(myData.wifiRSSI, myData.batteryVolt, myData.batteryCapacity, myData.sht30Temperatur, myData.sht30Humidity))
+      boolean jsonData_fetch_success = myData.jsonData.Get(myData.wifiRSSI, myData.batteryVolt, myData.batteryCapacity, myData.sht30Temperatur, myData.sht30Humidity);
+      if (jsonData_fetch_success)
       {
         Serial.println("Json data fetch successfull");
+      } else
+      {
+        Serial.println("Json data fetch failed");        
       }
 #endif
 
       myData.Dump();
-      myDisplay.Show();
+      myDisplay.Show(jsonData_fetch_success);
       StopWiFi();
     }
   } else

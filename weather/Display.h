@@ -66,7 +66,7 @@ class WeatherDisplay
     {
     }
 
-    void Show();
+    void Show(boolean jsonData_fetch_success);
 
     void ShowM5PaperInfo();
 };
@@ -477,7 +477,7 @@ void WeatherDisplay::DrawJsonData(int x, int y, int textSize, Json_data &jsonDat
 }
 
 /* Main function to show all the data to the e-paper */
-void WeatherDisplay::Show()
+void WeatherDisplay::Show(boolean jsonData_fetch_success)
 {
   Serial.println("WeatherDisplay::Show");
 
@@ -523,22 +523,29 @@ void WeatherDisplay::Show()
 
   canvas.drawRect(15, 408, maxX - 30, 122, M5EPD_Canvas::G15);
 
+  if (jsonData_fetch_success)
+  {
 #if defined(DISPLAY_WEATHER_DATA_GRAPH)
 
-  DrawGraph( 15, 408, 232, 122, "Temperature (C)", 0, 7, -20,   30, myData.weather.forecastMinTemp);
-  DrawGraph(247, 408, 232, 122, "Rain (mm)",       0, 7,   0,   myData.weather.maxRain, myData.weather.forecastRain);
-  DrawGraph(479, 408, 232, 122, "Humidity (%)",    0, 7,   0,  100, myData.weather.forecastHumidity);
-  DrawGraph(711, 408, 232, 122, "Pressure (hPa)",  0, 7, 800, 1400, myData.weather.forecastPressure);
+    DrawGraph( 15, 408, 232, 122, "Temperature (C)", 0, 7, -20,   30, myData.weather.forecastMinTemp);
+    DrawGraph(247, 408, 232, 122, "Rain (mm)",       0, 7,   0,   myData.weather.maxRain, myData.weather.forecastRain);
+    DrawGraph(479, 408, 232, 122, "Humidity (%)",    0, 7,   0,  100, myData.weather.forecastHumidity);
+    DrawGraph(711, 408, 232, 122, "Pressure (hPa)",  0, 7, 800, 1400, myData.weather.forecastPressure);
 
 #elif defined(DISPLAY_JSON_DATA)
 
-  DrawJsonData(20, 415, 2, myData.jsonData, 0);
-  DrawJsonData(250, 415, 2, myData.jsonData, 1);
-  DrawJsonData(485, 415, 2, myData.jsonData, 2);
-  DrawJsonData(715, 415, 2, myData.jsonData, 3);
+    DrawJsonData(20, 415, 2, myData.jsonData, 0);
+    DrawJsonData(250, 415, 2, myData.jsonData, 1);
+    DrawJsonData(485, 415, 2, myData.jsonData, 2);
+    DrawJsonData(715, 415, 2, myData.jsonData, 3);
 
 #endif
-
+  } else
+  {
+    canvas.setTextSize(3);
+    canvas.drawCentreString("JSON data retrieval failed. :/", 480, 455, 1);
+  }
+  
   canvas.pushCanvas(0, 0, UPDATE_MODE_GC16);
   delay(1000);
 }
