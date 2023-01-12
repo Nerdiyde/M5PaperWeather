@@ -23,6 +23,7 @@
 #include <HTTPClient.h>
 #include <WiFiClient.h>
 #include <ArduinoJson.h>
+#include "base64.h"
 
 #define MAX_COLUMNS   5
 #define MAX_ROWS  10
@@ -48,6 +49,13 @@ class Json_data
                     + "&sht30Temperatur=" + String(sht30Temperatur)
                     + "&sht30Humidity=" + String(sht30Humidity);
 
+Serial.print("Starting JSON data retrieval from: url:");
+Serial.print(JSON_DATA_URL);
+Serial.print(" port:");
+Serial.print(JSON_DATA_PORT);
+Serial.print(" path:");
+Serial.println(path);
+
 #if !defined(JSON_DATA_URL_USES_HTTPS)
       WiFiClient client;
       http.begin(client, JSON_DATA_URL, JSON_DATA_PORT, path);
@@ -57,11 +65,18 @@ class Json_data
       http.begin(client, JSON_DATA_URL, JSON_DATA_PORT, path, true);
 #endif
 
+#if defined(JSON_DATA_URL_USE_BASIC_AUTHENTICATION)
+      String auth = String(JSON_DATA_USER) + ":" + String(JSON_DATA_PASSWORD);
+      auth = base64::encode(auth);
+      http.addHeader("Authorization", "Basic " + auth);
+#endif
+
       int httpCode = http.GET();
 
       if (httpCode != HTTP_CODE_OK)
       {
         Serial.printf("Json data fetch failed, error: %s", http.errorToString(httpCode).c_str());
+        Serial.println();
         client.stop();
         http.end();
         return false;

@@ -66,6 +66,10 @@
 #define JSON_DATA_PORT 1880 // Define the port to your JSON data object here
 #define JSON_DATA_PATH "/json_test.json"
 
+#define JSON_DATA_URL_USE_BASIC_AUTHENTICATION  // Define this if the basic authentication credentials shall be considered
+#define JSON_DATA_USER "Username" // Username
+#define JSON_DATA_PASSWORD "enterSecretPasswordHere" // Password
+
 // ========== Sanity check: DO NOT CHANGE ANYTHING BELOW THIS LINE! ========== 
 
 #if DISPLAY_ORIENTATION!=2 && DISPLAY_ORIENTATION!=0

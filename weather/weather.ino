@@ -71,7 +71,7 @@ void setup()
         Serial.println("Json data fetch successfull");
       } else
       {
-        Serial.println("Json data fetch failed");        
+        Serial.println("Json data fetch failed. :/");        
       }
 #endif
 
